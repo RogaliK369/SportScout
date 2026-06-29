@@ -1,27 +1,23 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Button } from '@/components/Button';
+import { LoginBrandHeader } from '@/components/LoginBrandHeader';
 import { ScreenContainer } from '@/components/ScreenContainer';
+import { SectionLabel } from '@/components/SectionLabel';
 import { SportChip } from '@/components/SportChip';
+import { TextField } from '@/components/TextField';
 import { Colors, Routes, SPORTS, type Sport } from '@/constants';
 import { loginUser } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 
 /**
- * Login screen: email + sport interests.
- * After login, users are taken to the Home tab.
+ * Login screen: optional name & email, sport interests required.
  */
 export default function LoginScreen() {
   const { login } = useAuth();
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [selectedSports, setSelectedSports] = useState<Sport[]>([]);
   const [error, setError] = useState('');
@@ -34,12 +30,8 @@ export default function LoginScreen() {
   };
 
   const handleLogin = async () => {
+    const trimmedName = name.trim();
     const trimmedEmail = email.trim();
-
-    if (!trimmedEmail) {
-      setError('Please enter your email.');
-      return;
-    }
 
     if (selectedSports.length === 0) {
       setError('Pick at least one sport. You can add more later in your profile.');
@@ -50,8 +42,8 @@ export default function LoginScreen() {
     setIsLoading(true);
 
     try {
-      await loginUser({ email: trimmedEmail, sports: selectedSports });
-      login(trimmedEmail, selectedSports);
+      await loginUser({ name: trimmedName, email: trimmedEmail, sports: selectedSports });
+      login({ name: trimmedName, email: trimmedEmail, sports: selectedSports, photoUri: null });
       router.replace(Routes.home);
     } finally {
       setIsLoading(false);
@@ -61,31 +53,35 @@ export default function LoginScreen() {
   return (
     <ScreenContainer>
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>SportScout</Text>
-        <Text style={styles.subtitle}>
-          Find local clubs and training sessions in your city.
-        </Text>
+        <LoginBrandHeader subtitle="Find local clubs and training sessions in your city." />
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput
+        <TextField
+          label="Your name (optional)"
+          placeholder="Alex"
+          autoCapitalize="words"
+          autoComplete="name"
+          value={name}
+          onChangeText={setName}
+        />
+
+        <TextField
+          label="Email (optional)"
+          placeholder="you@example.com"
           autoCapitalize="none"
           autoComplete="email"
           keyboardType="email-address"
-          placeholder="you@example.com"
-          placeholderTextColor={Colors.textSecondary}
-          style={styles.input}
           value={email}
           onChangeText={setEmail}
         />
 
-        <Text style={styles.label}>Which sports interest you?</Text>
+        <SectionLabel>Which sports interest you?</SectionLabel>
         <Text style={styles.hint}>Select one or more. You can change this later.</Text>
 
-        <View style={styles.chipRow}>
+        <View style={styles.sportGrid}>
           {SPORTS.map((sport) => (
             <SportChip
               key={sport}
-              label={sport}
+              sport={sport}
               selected={selectedSports.includes(sport)}
               onPress={() => toggleSport(sport)}
             />
@@ -108,43 +104,16 @@ const styles = StyleSheet.create({
   content: {
     paddingBottom: 32,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 8,
-  },
-  subtitle: {
-    fontSize: 16,
-    color: Colors.textSecondary,
-    marginBottom: 28,
-    lineHeight: 22,
-  },
-  label: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 8,
-  },
   hint: {
     fontSize: 14,
     color: Colors.textSecondary,
+    marginTop: -4,
     marginBottom: 12,
   },
-  input: {
-    backgroundColor: Colors.surface,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    fontSize: 16,
-    color: Colors.text,
-    marginBottom: 24,
-  },
-  chipRow: {
+  sportGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
+    justifyContent: 'space-between',
     marginBottom: 20,
   },
   error: {

@@ -1,6 +1,6 @@
-import { Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
+import { Platform, Pressable, StyleSheet, Text, type PressableProps } from 'react-native';
 
-import { Colors } from '@/constants/colors';
+import { Colors, Theme } from '@/constants';
 
 type ButtonProps = PressableProps & {
   title: string;
@@ -34,13 +34,25 @@ export function Button({ title, variant = 'primary', style, disabled, ...props }
 
 const styles = StyleSheet.create({
   base: {
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 20,
+    borderRadius: Theme.radius.md,
+    paddingVertical: 15,
+    paddingHorizontal: 22,
     alignItems: 'center',
   },
   primary: {
     backgroundColor: Colors.primary,
+    ...Platform.select({
+      ios: {
+        shadowColor: Colors.primaryDark,
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.25,
+        shadowRadius: 8,
+      },
+      android: {
+        elevation: 4,
+      },
+      default: {},
+    }),
   },
   secondary: {
     backgroundColor: Colors.surface,
@@ -51,16 +63,18 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   pressed: {
-    opacity: 0.85,
+    opacity: 0.88,
+    transform: [{ scale: 0.98 }],
   },
   label: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   primaryLabel: {
     color: Colors.white,
   },
   secondaryLabel: {
-    color: Colors.text,
+    color: Colors.primaryDark,
   },
 });

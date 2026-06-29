@@ -7,10 +7,24 @@ export const SPORTS = [
   'Basketball',
   'Tennis',
   'Swimming',
-  'Running',
   'Volleyball',
-  'Boxing',
+  'Martial Arts',
   'Yoga',
+  'Badminton',
+  'Paddle',
 ] as const;
 
 export type Sport = (typeof SPORTS)[number];
+
+/** Emoji icons shown on the login sport picker (no extra image files needed). */
+export const SPORT_ICONS: Record<Sport, string> = {
+  Football: '⚽',
+  Basketball: '🏀',
+  Tennis: '🎾',
+  Swimming: '🏊',
+  Volleyball: '🏐',
+  'Martial Arts': '🥋',
+  Yoga: '🧘',
+  Badminton: '🏸',
+  Paddle: '🏓',
+};
